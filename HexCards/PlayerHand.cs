@@ -110,21 +110,14 @@ namespace HexCards
             if (oldMouse.LeftButton == ButtonState.Pressed && currentMouse.LeftButton == ButtonState.Released && isDragging)
             {
                 isDragging = false;
-
-                //if the mousebutton was released inside the board
+                board.PlaceCard(card1);
+                              
                 if (IsMouseInsideBoard())
                 {
-                    drawText = "RELEASED!";
-                    board.PlaceCard(card1);
-
-                    
-                    ////find out which square the mouse is over
-                    //Vector2 tile = GetSquareFromCurrentMousePosition();
-                    ////and set that square to true (has a piece)
-                    //board[(int)tile.X, (int)tile.Y] = true;
+                    drawText = "on board";
                 }
                 else
-                    drawText = "not released";
+                    drawText = "off board";
             }
         }
 
