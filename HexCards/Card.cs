@@ -44,9 +44,9 @@ namespace HexCards
         public byte LeftNumber { get; private set; }
         public byte RightNumber { get; private set; }
 
-        //bool selected = false;
+        public Point origPos;
 
-        public Card(ContentManager cm, float scale, Point pos, CardColor cardColor, int cardID)
+        public Card(ContentManager cm, float scale, int position, CardColor cardColor, int cardID)
         {
             //Load content
             backOfCard = cm.Load<Texture2D>("backofcard");
@@ -67,7 +67,7 @@ namespace HexCards
 
             //Position Card Elements
             drawRectangle = new Rectangle(0, 0, (int)(hexWidth * scale), (int)(hexHeight * scale));
-            drawRectangle.Location = pos;
+            drawRectangle.Location = new Point(position;
             frameRectangle = new Rectangle((int)cardColor * hexWidth, 0, hexWidth, hexHeight);
 
             //This just defines the size of the draw rectangle for the numbers

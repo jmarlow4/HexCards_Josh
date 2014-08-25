@@ -111,7 +111,7 @@ namespace HexCards
             MouseState mouse = Mouse.GetState();
             TouchCollection touchColl = TouchPanel.GetState();
             hand.Update(gameTime, mouse, touchColl);
-            base.Update(gameTime);
+            //base.Update(gameTime);
             
         }
 

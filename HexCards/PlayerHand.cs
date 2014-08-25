@@ -13,8 +13,7 @@ namespace HexCards
     class PlayerHand
     {
         Texture2D bg;
-        Rectangle drawRectangle;
-        Card card1;
+        List<Card> cards;
         SpriteFont myFont;
         float scale;
         string drawText = "";
@@ -27,20 +26,20 @@ namespace HexCards
         MouseState oldMouse, currentMouse;
         TouchCollection touchColl, oldTouch;
         Vector2 touchDownPosition;
-
-        Point origPos;
         
-
         public PlayerHand(ContentManager cm, int screenWidth, int screenHeight, float scale, Hexboard board)
         {
             this.scale = scale;
             bg = cm.Load<Texture2D>("playerHandBG");
             int bgWidth = (int)(bg.Width * scale);
             int bgHeight = (int)(bg.Height * scale);
-            drawRectangle = new Rectangle(screenWidth / 2 - bgWidth / 2,
-                screenHeight - (int)(bgHeight * 0.75), bgWidth, bgHeight);
-            card1 = new Card(cm, scale, new Point(screenWidth/2, drawRectangle.Y), CardColor.Red, 40);
-            origPos = card1.drawRectangle.Location;
+            
+            for (int i = 0; i < 9; i++)
+            {
+                Card c = new Card(cm, scale, i, CardColor.Red, 40);
+                cards.Add(c);
+            }           
+           
             myFont = cm.Load<SpriteFont>("Arial");
             this.board = board;
         }
