@@ -81,7 +81,7 @@ namespace HexCards
         }
 
         public void Draw(SpriteBatch spriteBatch)
-        {            
+        {    
             spriteBatch.Draw(backOfCard, drawRectangle, null, Color.White, 0, Vector2.Zero, SpriteEffects.None, .003f);
             spriteBatch.Draw(frameSheet, drawRectangle, frameRectangle, Color.White, 0, Vector2.Zero, SpriteEffects.None, .0031f);
 
