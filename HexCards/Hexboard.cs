@@ -20,12 +20,11 @@ namespace HexCards
         int tileWidth;                                  //The width of the hex slot
 
         //Some text used for debugging
-        string drawText = "";
         SpriteFont myFont;
 
         //Arrays to hold the slots and the cards. I'm currently having trouble with the card array
         Hex[] blankHexes = new Hex[19];
-        Card[] cards = new Card[19];
+        Card[] cards = new Card[19]; //not sure we need this, the playerhand is keeping track of the cards
 
         public Hexboard(ContentManager cm, Point center, float scale)
         {
@@ -148,8 +147,6 @@ namespace HexCards
                 t.Draw(spriteBatch);
             }
 
-            //spriteBatch.Draw(board, drawRectangle, null, Color.White, 0, Vector2.Zero, SpriteEffects.None, .001f);
-            //spriteBatch.DrawString(myFont, drawText, new Vector2(drawRectangle.X, drawRectangle.Y + drawRectangle.Height), Color.White);
         }
         
         //Does this look familiar?
@@ -195,10 +192,12 @@ namespace HexCards
         //Checks to see if the point lays inside the drawrectangle of the board
         public bool ContainsPoint(Vector2 point)
         {
-            if (drawRectangle.Contains(point))
-                return true;
-            else
-                return false;
+            foreach (Hex h in blankHexes)
+            {
+                if (h.drawRectangle.Contains(point)) return true;
+            }
+
+            return false;
         }
     }
 }

@@ -44,9 +44,9 @@ namespace HexCards
         public byte LeftNumber { get; private set; }
         public byte RightNumber { get; private set; }
 
-        //bool selected = false;
+        public Point origPos;
 
-        public Card(ContentManager cm, float scale, Point pos, CardColor cardColor, int cardID)
+        public Card(ContentManager cm, float scale, CardColor cardColor, int cardID)
         {
             //Load content
             backOfCard = cm.Load<Texture2D>("backofcard");
@@ -54,8 +54,8 @@ namespace HexCards
             numberSheet = cm.Load<Texture2D>("numbers");
 
             this.scale = scale;
-            hexWidth = (int)(backOfCard.Width);
-            hexHeight = (int)(backOfCard.Height);
+            hexWidth = (int)(backOfCard.Width * scale);
+            hexHeight = (int)(backOfCard.Height * scale);
             radius = hexWidth / 2 * scale;
 
             //Assign Numbers
@@ -66,9 +66,8 @@ namespace HexCards
             RightNumber = cardNumbers.Item3;
 
             //Position Card Elements
-            drawRectangle = new Rectangle(0, 0, (int)(hexWidth * scale), (int)(hexHeight * scale));
-            drawRectangle.Location = pos;
-            frameRectangle = new Rectangle((int)cardColor * hexWidth, 0, hexWidth, hexHeight);
+            drawRectangle = new Rectangle(0, 0, hexWidth, hexHeight);
+            frameRectangle = new Rectangle((int)cardColor * backOfCard.Width, 0, backOfCard.Width, backOfCard.Height);
 
             //This just defines the size of the draw rectangle for the numbers
             topNumSource = new Rectangle(TopNumber * 18, 0, 18, 22);
@@ -76,20 +75,19 @@ namespace HexCards
             rightNumSource = new Rectangle(RightNumber * 18, 0, 18, 22);
         }
 
-        public void Draw(SpriteBatch spriteBatch, Point location)
+        public void SetPosition(Point position)
         {
-            drawRectangle.Location = location;
+            drawRectangle.Location = position;
+        }
+
+        public void Draw(SpriteBatch spriteBatch)
+        {    
             spriteBatch.Draw(backOfCard, drawRectangle, null, Color.White, 0, Vector2.Zero, SpriteEffects.None, .003f);
             spriteBatch.Draw(frameSheet, drawRectangle, frameRectangle, Color.White, 0, Vector2.Zero, SpriteEffects.None, .0031f);
 
             DrawNumbers(spriteBatch);
         }
-
-        //public void Update(GameTime time, MouseState mouse, TouchCollection touchColl)
-        //{
-           
-        //}
-
+        
         //Contains is a circle because if it were a rectangle it would overlap with other cards
         public bool Contains(Vector2 pos)
         {

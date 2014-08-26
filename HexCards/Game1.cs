@@ -19,7 +19,7 @@ namespace HexCards
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
-
+                
         const int DEFAULT_WIDTH = 768;
         const int DEFAULT_HEIGHT = 1280;
         float scale;
@@ -85,7 +85,7 @@ namespace HexCards
             //hex = Content.Load<Texture2D>("");
             myFont = Content.Load<SpriteFont>("Arial");
             board = new Hexboard(Content, new Point(GraphicsDevice.Viewport.Width / 2, (int)(GraphicsDevice.Viewport.Height * 0.4)), scale);
-            hand = new PlayerHand(Content, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, scale, board);
+            hand = new PlayerHand(Content, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height, scale, board, 12);
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace HexCards
             MouseState mouse = Mouse.GetState();
             TouchCollection touchColl = TouchPanel.GetState();
             hand.Update(gameTime, mouse, touchColl);
-            base.Update(gameTime);
+            //base.Update(gameTime);
             
         }
 

@@ -13,8 +13,11 @@ namespace HexCards
     class PlayerHand
     {
         Texture2D bg;
-        Rectangle drawRectangle;
-        Card card1;
+        Rectangle bgRectangle;
+
+        Card selectedCard;
+        List<Card> cards = new List<Card>();
+
         SpriteFont myFont;
         float scale;
         string drawText = "";
@@ -22,42 +25,55 @@ namespace HexCards
 
         Vector2 currentMousePosition;
         Vector2 mouseDownPosition;
-        bool isDragging = false;
+        bool isScrolling = false;
         bool isTouchDragging = false;
         MouseState oldMouse, currentMouse;
         TouchCollection touchColl, oldTouch;
         Vector2 touchDownPosition;
 
-        Point origPos;
-        
+        //scroll
+        int scrollPosition = 0;
+        const int pixelsFromEdge = 50;
+        const int scrollSpeed = 4;
 
-        public PlayerHand(ContentManager cm, int screenWidth, int screenHeight, float scale, Hexboard board)
+        public PlayerHand(ContentManager cm, int screenWidth, int screenHeight, float scale, Hexboard board, int numberOfCards)
         {
             this.scale = scale;
             bg = cm.Load<Texture2D>("playerHandBG");
             int bgWidth = (int)(bg.Width * scale);
-            int bgHeight = (int)(bg.Height * scale);
-            drawRectangle = new Rectangle(screenWidth / 2 - bgWidth / 2,
-                screenHeight - (int)(bgHeight * 0.75), bgWidth, bgHeight);
-            card1 = new Card(cm, scale, new Point(screenWidth/2, drawRectangle.Y), CardColor.Red, 40);
-            origPos = card1.drawRectangle.Location;
+            int bgHeight = (int)(bg.Height * scale * 0.85);
+            bgRectangle = new Rectangle(0, screenHeight - (int)(bgHeight), screenWidth, bgHeight);
+            for (int i = 0; i < numberOfCards; i++)
+            {
+                Card c = new Card(cm, scale, CardColor.Red, 40);
+                Point cardPosition;
+                if (i < numberOfCards / 2) //first row
+                {
+                    cardPosition = new Point(i * c.hexWidth, bgRectangle.Top);
+                }
+                else //second row
+                {
+                    cardPosition = new Point((i - (numberOfCards / 2)) * c.hexWidth + c.hexWidth / 2, bgRectangle.Top + (int)(c.hexHeight * 0.75));
+                }
+
+                c.drawRectangle.Location = cardPosition;
+                c.origPos = cardPosition;
+                cards.Add(c);
+            }
+
             myFont = cm.Load<SpriteFont>("Arial");
             this.board = board;
         }
 
         public void Draw(SpriteBatch sb)
         {
-            //TODO: we'll want to iterate over a collection of cards instead of just one
             sb.DrawString(myFont, drawText, new Vector2(0, 0), Color.White);
-            sb.Draw(bg, drawRectangle, null, Color.White, 0, Vector2.Zero, SpriteEffects.None, .0001f);
-            if (isDragging)
-                card1.Draw(sb, new Point((int)(currentMousePosition.X - card1.hexWidth / 2 * scale), (int)(currentMousePosition.Y - card1.hexHeight / 2 * scale)));
-            else if (isTouchDragging)
-                card1.Draw(sb, new Point((int)(touchColl[0].Position.X - card1.hexWidth / 2 * scale), (int)(touchColl[0].Position.Y - 50 - card1.hexHeight / 2 * scale)));
-            else if (card1.onBoard)
-                card1.Draw(sb, card1.drawRectangle.Location);
-            else
-                card1.Draw(sb, origPos);
+            sb.Draw(bg, bgRectangle, null, Color.White, 0, Vector2.Zero, SpriteEffects.None, .0001f);
+            foreach (Card c in cards)
+            {
+                c.Draw(sb);
+            }
+
         }
 
         public void Update(GameTime time, MouseState mouse, TouchCollection touchColl)
@@ -72,59 +88,92 @@ namespace HexCards
             CheckTouchDown();
             CheckTouchRelease();
 
-            //if (IsMouseInsideBoard())
-            //    drawText = "inside board!";                
-            //else
-            //    drawText = "not inside board";
-
             oldMouse = currentMouse;
             oldTouch = touchColl;
 
-            //drawText = mouse.Position.ToString();
-            //card1.RealignCardElements();
         }
+
 
         private void CheckForLeftButtonDown()
         {
-            if (currentMouse.LeftButton == ButtonState.Pressed)
+            //new clicks
+            if (currentMouse.LeftButton == ButtonState.Pressed && oldMouse.LeftButton == ButtonState.Released)
             {
-                //if this Update() is a new click - store the mouse-down position
-                if (oldMouse.LeftButton == ButtonState.Released)
+                mouseDownPosition = currentMousePosition;
+                foreach (Card card in cards)
                 {
-                    mouseDownPosition = currentMousePosition;
-                }
-
-                //if the mousedown was within the draggable tile 
-                //and the mouse has been moved more than 10 pixels:
-                //start dragging
-                if ((mouseDownPosition - currentMousePosition).Length() > 10 && card1.Contains(mouseDownPosition))
-                {
-                    isDragging = true;
+                    if (card.drawRectangle.Contains(mouseDownPosition))
+                    {
+                        selectedCard = card;
+                    }
                 }
             }
+
+            //Scrolling
+            //wait for mouse to move determinately so we know if it's a scroll or a tile movement
+            if (currentMouse.LeftButton == ButtonState.Pressed && mouseDownPosition.Y > bgRectangle.Top)
+            {
+                //scrolling
+                if (isScrolling)
+                {
+                    int difference = (int)(currentMousePosition.X - mouseDownPosition.X);
+                    foreach (Card card in cards)
+                    {
+                        if (!card.onBoard)
+                        {
+                            card.drawRectangle.X += difference;
+                        }
+                        card.origPos.X += difference;
+                    }
+                    mouseDownPosition.X = currentMousePosition.X;
+                }
+                //check to see if starting to scroll
+                else if (Math.Abs(mouseDownPosition.X - currentMousePosition.X) > 10 && Math.Abs(mouseDownPosition.Y - currentMousePosition.Y) < 5) 
+                {
+                    isScrolling = true;
+                    if (selectedCard != null)
+                    {
+                        selectedCard.SetPosition(selectedCard.origPos);
+                        selectedCard = null;
+                    }
+                }
+                //add lag so card doesn't move instantly
+                else if (Math.Abs(mouseDownPosition.Y - currentMousePosition.Y) > 15)
+                {
+                    selectedCard.SetPosition(new Point((int)currentMousePosition.X - selectedCard.hexWidth / 2, (int)currentMousePosition.Y - selectedCard.hexHeight / 2));
+                }
+
+            }
+            else if (currentMouse.LeftButton == ButtonState.Pressed && selectedCard != null)
+            {
+                selectedCard.SetPosition(new Point((int)currentMousePosition.X - selectedCard.hexWidth / 2, (int)currentMousePosition.Y - selectedCard.hexHeight / 2));
+            }
+
+
+
         }
 
         private void CheckForLeftButtonRelease()
         {
             //if the user just released the mousebutton - set _isDragging to false, and check if we should add the tile to the board
-            if (oldMouse.LeftButton == ButtonState.Pressed && currentMouse.LeftButton == ButtonState.Released && isDragging)
+            if (oldMouse.LeftButton == ButtonState.Pressed && currentMouse.LeftButton == ButtonState.Released)
             {
-                isDragging = false;
 
-                //if the mousebutton was released inside the board
-                if (IsMouseInsideBoard())
+                if (selectedCard != null)
                 {
-                    drawText = "RELEASED!";
-                    board.PlaceCard(card1);
-
-                    
-                    ////find out which square the mouse is over
-                    //Vector2 tile = GetSquareFromCurrentMousePosition();
-                    ////and set that square to true (has a piece)
-                    //board[(int)tile.X, (int)tile.Y] = true;
+                    board.PlaceCard(selectedCard);
+                    if (board.ContainsPoint(currentMousePosition))
+                    {
+                        drawText = "on board";
+                    }
+                    else
+                    {
+                        drawText = "off board";
+                        selectedCard.SetPosition(selectedCard.origPos);
+                    }
                 }
-                else
-                    drawText = "not released";
+                selectedCard = null;
+                isScrolling = false;
             }
         }
 
@@ -136,8 +185,12 @@ namespace HexCards
                 if (oldTouch.Count == 0)
                     touchDownPosition = touchColl[0].Position;
 
-                if ((touchDownPosition - touchColl[0].Position).Length() > 10 && card1.Contains(touchDownPosition))
-                    isTouchDragging = true;
+                foreach (Card card in cards)
+                {
+                    if ((touchDownPosition - touchColl[0].Position).Length() > 10 && card.Contains(touchDownPosition))
+                        selectedCard = card;
+                }
+
             }
         }
         private void CheckTouchRelease()
@@ -146,14 +199,6 @@ namespace HexCards
                 isTouchDragging = false;
         }
 
-        private bool IsMouseInsideBoard()
-        {
-           
-                if (board.ContainsPoint(currentMousePosition))
-                    return true;
-                else
-                    return false;
-            
-        }
+
     }
 }
