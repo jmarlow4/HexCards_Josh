@@ -114,15 +114,6 @@ namespace HexCards
             if (currentMouse.LeftButton == ButtonState.Pressed && mouseDownPosition.Y > bgRectangle.Top)
             {
                 //scrolling
-                if (Math.Abs(mouseDownPosition.X - currentMousePosition.X) > 10 && Math.Abs(mouseDownPosition.Y - currentMousePosition.Y) < 5 && !isScrolling)
-                {
-                    isScrolling = true;
-                    if (selectedCard != null)
-                    {
-                        selectedCard.SetPosition(selectedCard.origPos);
-                        selectedCard = null;
-                    }
-                }
                 if (isScrolling)
                 {
                     int difference = (int)(currentMousePosition.X - mouseDownPosition.X);
@@ -136,22 +127,28 @@ namespace HexCards
                     }
                     mouseDownPosition.X = currentMousePosition.X;
                 }
+                //check to see if starting to scroll
+                else if (Math.Abs(mouseDownPosition.X - currentMousePosition.X) > 10 && Math.Abs(mouseDownPosition.Y - currentMousePosition.Y) < 5) 
+                {
+                    isScrolling = true;
+                    if (selectedCard != null)
+                    {
+                        selectedCard.SetPosition(selectedCard.origPos);
+                        selectedCard = null;
+                    }
+                }
+                //add lag so card doesn't move instantly
+                else if (Math.Abs(mouseDownPosition.Y - currentMousePosition.Y) > 15)
+                {
+                    selectedCard.SetPosition(new Point((int)currentMousePosition.X - selectedCard.hexWidth / 2, (int)currentMousePosition.Y - selectedCard.hexHeight / 2));
+                }
 
-               
             }
-
-            //normal card movement
-            if (currentMouse.LeftButton == ButtonState.Pressed)
+            else if (currentMouse.LeftButton == ButtonState.Pressed && selectedCard != null)
             {
-                if (mouseDownPosition.Y > bgRectangle.Top && Math.Abs(mouseDownPosition.X - currentMousePosition.X) < 15 && Math.Abs(mouseDownPosition.Y - currentMousePosition.Y) < 15 && !isScrolling)
-                {
-                    //add lag so card doesn't move instantly
-                }
-                else
-                {
-                    if (selectedCard != null) selectedCard.SetPosition(new Point((int)currentMousePosition.X - selectedCard.hexWidth / 2, (int)currentMousePosition.Y - selectedCard.hexHeight / 2));
-                }
+                selectedCard.SetPosition(new Point((int)currentMousePosition.X - selectedCard.hexWidth / 2, (int)currentMousePosition.Y - selectedCard.hexHeight / 2));
             }
+
 
 
         }
