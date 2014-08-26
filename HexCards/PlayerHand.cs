@@ -109,8 +109,9 @@ namespace HexCards
                 }
             }
 
+            //Scrolling
             //wait for mouse to move determinately so we know if it's a scroll or a tile movement
-            if (currentMouse.LeftButton == ButtonState.Pressed)
+            if (currentMouse.LeftButton == ButtonState.Pressed && mouseDownPosition.Y > bgRectangle.Top)
             {
                 //scrolling
                 if (Math.Abs(mouseDownPosition.X - currentMousePosition.X) > 10 && Math.Abs(mouseDownPosition.Y - currentMousePosition.Y) < 5 && !isScrolling)
@@ -136,11 +137,21 @@ namespace HexCards
                     mouseDownPosition.X = currentMousePosition.X;
                 }
 
+               
             }
 
-
-            if (selectedCard != null) selectedCard.SetPosition(new Point((int)currentMousePosition.X - selectedCard.hexWidth / 2, (int)currentMousePosition.Y - selectedCard.hexHeight / 2));
-
+            //normal card movement
+            if (currentMouse.LeftButton == ButtonState.Pressed)
+            {
+                if (mouseDownPosition.Y > bgRectangle.Top && Math.Abs(mouseDownPosition.X - currentMousePosition.X) < 15 && Math.Abs(mouseDownPosition.Y - currentMousePosition.Y) < 15 && !isScrolling)
+                {
+                    //add lag so card doesn't move instantly
+                }
+                else
+                {
+                    if (selectedCard != null) selectedCard.SetPosition(new Point((int)currentMousePosition.X - selectedCard.hexWidth / 2, (int)currentMousePosition.Y - selectedCard.hexHeight / 2));
+                }
+            }
 
 
         }
