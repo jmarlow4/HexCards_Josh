@@ -77,7 +77,7 @@ namespace HexCards
 
         public void SetPosition(Point position)
         {
-            drawRectangle.Location = new Point(position.X-drawRectangle.Width/2, position.Y-drawRectangle.Height/2);
+            drawRectangle.Location = position;
         }
 
         public void Draw(SpriteBatch spriteBatch)

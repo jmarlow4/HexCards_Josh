@@ -35,13 +35,13 @@ namespace HexCards
             this.scale = scale;
             bg = cm.Load<Texture2D>("playerHandBG");
             int bgWidth = (int)(bg.Width * scale);
-            int bgHeight = (int)(bg.Height * scale * 0.75);
+            int bgHeight = (int)(bg.Height * scale * 0.85);
             bgRectangle = new Rectangle(0, screenHeight - (int)(bgHeight), screenWidth, bgHeight);
             for (int i = 0; i < 9; i++)
             {
                 Card c = new Card(cm, scale, CardColor.Red, 40);
                 Point cardPosition = new Point(i * c.hexWidth, bgRectangle.Top);
-                c.SetPosition(cardPosition);
+                c.drawRectangle.Location = cardPosition;
                 c.origPos = cardPosition;
                 cards.Add(c);
             }
@@ -66,7 +66,7 @@ namespace HexCards
             currentMouse = mouse;
             currentMousePosition = new Vector2(currentMouse.Position.X, currentMouse.Position.Y);
 
-            if (selectedCard != null) selectedCard.SetPosition(new Point((int)currentMousePosition.X, (int)currentMousePosition.Y));
+            if (selectedCard != null) selectedCard.SetPosition(new Point((int)currentMousePosition.X-selectedCard.hexWidth/2, (int)currentMousePosition.Y-selectedCard.hexHeight/2));
 
             this.touchColl = touchColl;
 
