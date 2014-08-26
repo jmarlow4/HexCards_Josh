@@ -20,7 +20,6 @@ namespace HexCards
         int tileWidth;                                  //The width of the hex slot
 
         //Some text used for debugging
-        string drawText = "";
         SpriteFont myFont;
 
         //Arrays to hold the slots and the cards. I'm currently having trouble with the card array

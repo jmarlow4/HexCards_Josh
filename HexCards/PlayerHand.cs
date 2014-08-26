@@ -30,17 +30,31 @@ namespace HexCards
         TouchCollection touchColl, oldTouch;
         Vector2 touchDownPosition;
 
-        public PlayerHand(ContentManager cm, int screenWidth, int screenHeight, float scale, Hexboard board)
+        //scroll
+        int scrollPosition = 0;
+        const int pixelsFromEdge = 50;
+        const int scrollSpeed = 4;
+
+        public PlayerHand(ContentManager cm, int screenWidth, int screenHeight, float scale, Hexboard board, int numberOfCards)
         {
             this.scale = scale;
             bg = cm.Load<Texture2D>("playerHandBG");
             int bgWidth = (int)(bg.Width * scale);
             int bgHeight = (int)(bg.Height * scale * 0.85);
             bgRectangle = new Rectangle(0, screenHeight - (int)(bgHeight), screenWidth, bgHeight);
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < numberOfCards; i++)
             {
                 Card c = new Card(cm, scale, CardColor.Red, 40);
-                Point cardPosition = new Point(i * c.hexWidth, bgRectangle.Top);
+                Point cardPosition;
+                if (i < numberOfCards / 2) //first row
+                {
+                    cardPosition = new Point(i * c.hexWidth, bgRectangle.Top);
+                }
+                else //second row
+                {
+                    cardPosition = new Point((i-(numberOfCards/2)) * c.hexWidth+c.hexWidth/2, bgRectangle.Top+(int)(c.hexHeight*0.75));
+                }
+
                 c.drawRectangle.Location = cardPosition;
                 c.origPos = cardPosition;
                 cards.Add(c);
@@ -66,7 +80,7 @@ namespace HexCards
             currentMouse = mouse;
             currentMousePosition = new Vector2(currentMouse.Position.X, currentMouse.Position.Y);
 
-            if (selectedCard != null) selectedCard.SetPosition(new Point((int)currentMousePosition.X-selectedCard.hexWidth/2, (int)currentMousePosition.Y-selectedCard.hexHeight/2));
+            if (selectedCard != null) selectedCard.SetPosition(new Point((int)currentMousePosition.X - selectedCard.hexWidth / 2, (int)currentMousePosition.Y - selectedCard.hexHeight / 2));
 
             this.touchColl = touchColl;
 
@@ -74,12 +88,50 @@ namespace HexCards
             CheckForLeftButtonRelease();
             CheckTouchDown();
             CheckTouchRelease();
+            CheckScroll();
 
             oldMouse = currentMouse;
             oldTouch = touchColl;
 
         }
 
+        private void CheckScroll()
+        {
+            //scroll left
+            if (currentMousePosition.X < pixelsFromEdge && currentMousePosition.Y > bgRectangle.Top)
+            {
+                if (scrollPosition > 0)
+                {
+                    scrollPosition -= scrollSpeed;
+                    foreach (Card card in cards)
+                    {
+                        if (!card.onBoard)
+                        {
+                            card.drawRectangle.X += scrollSpeed;
+
+                        }
+                        card.origPos.X += scrollSpeed;
+                    }
+                }
+            }
+            //scroll right
+            else if (currentMousePosition.X > bgRectangle.Right - pixelsFromEdge && currentMousePosition.Y > bgRectangle.Top)
+            {
+                if (scrollPosition < 500)
+                {
+                    scrollPosition += scrollSpeed;
+                    foreach (Card card in cards)
+                    {
+                        if (!card.onBoard)
+                        {
+                            card.drawRectangle.X -= scrollSpeed;
+
+                        }
+                        card.origPos.X -= scrollSpeed;
+                    }
+                }
+            }
+        }
         private void CheckForLeftButtonDown()
         {
             if (currentMouse.LeftButton == ButtonState.Pressed)
@@ -143,6 +195,6 @@ namespace HexCards
                 isTouchDragging = false;
         }
 
-        
+
     }
 }

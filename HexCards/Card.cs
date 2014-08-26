@@ -87,12 +87,7 @@ namespace HexCards
 
             DrawNumbers(spriteBatch);
         }
-
-        //public void Update(GameTime time, MouseState mouse, TouchCollection touchColl)
-        //{
-           
-        //}
-
+        
         //Contains is a circle because if it were a rectangle it would overlap with other cards
         public bool Contains(Vector2 pos)
         {
